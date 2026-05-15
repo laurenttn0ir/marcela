@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Oi Mo ♡</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+    
+    body {
+      font-family: 'Press Start 2P', system-ui;
+      background: linear-gradient(180deg, #5f0a3d, #9f1e5e, #3f0a2a);
+    }
+    
+    .crt { filter: contrast(1.15) brightness(1.05) saturate(1.4); }
+    
+    .scanline {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(to bottom, transparent 50%, rgba(255, 105, 180, 0.12) 50%);
+      background-size: 100% 4px;
+      pointer-events: none; animation: scan 4s linear infinite; z-index: 9999;
+    }
+    
+    @keyframes scan { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
+    
+    .window {
+      border: 6px solid #ffb3d1;
+      box-shadow: 0 0 0 6px #5f0a3d;
+      background: rgba(30, 5, 20, 0.95);
+      color: #ffe4f0;
+    }
+    
+    .heart {
+      position: absolute; font-size: 58px; cursor: pointer; user-select: none;
+      animation: float 2.8s infinite ease-in-out;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-30px) rotate(12deg); }
+    }
+  </style>
+</head>
+<body class="min-h-screen crt overflow-hidden pb-12">
+  <div class="scanline"></div>
+  
+  <div class="max-w-5xl mx-auto p-6 pt-10">
+
+    <div class="window p-12 mb-10 text-center rounded-3xl">
+      <h1 class="text-7xl text-pink-300 tracking-widest mb-4">OI MO ♡</h1>
+      <p class="text-2xl text-pink-200">um mundinho feito com todo carinho pra você</p>
+    </div>
+
+    <!-- Game -->
+    <div class="window p-10 mb-10 rounded-3xl">
+      <div class="flex justify-between mb-6">
+        <p class="text-pink-200 text-xl">DESAFIO DOS AMORES</p>
+        <p id="timer" class="text-red-400 font-bold text-5xl">60s</p>
+      </div>
+      <div class="flex justify-between mb-8">
+        <p class="text-pink-200 text-xl">CORAÇÕES COLETADOS</p>
+        <p id="score" class="text-pink-300 font-bold text-5xl">❤️ 0</p>
+      </div>
+      <div id="game-area" class="h-96 bg-pink-950 border-4 border-pink-400 relative overflow-hidden cursor-crosshair touch-manipulation rounded-2xl"></div>
+    </div>
+
+    <!-- Love Meter -->
+    <div class="window p-10 mb-10 text-center rounded-3xl">
+      <p class="text-pink-200 text-2xl mb-6">NOSSO LOVE METER</p>
+      <div class="h-10 bg-pink-900 border-4 border-pink-400 relative rounded-full overflow-hidden">
+        <div id="loveBar" class="h-full bg-gradient-to-r from-pink-400 to-rose-400 w-full"></div>
+      </div>
+      <p class="text-3xl mt-6 text-pink-300 font-bold">100% - AMOR MÁXIMO ♡</p>
+    </div>
+
+    <!-- Motivos -->
+    <div class="window p-10 mb-10 rounded-3xl">
+      <h2 class="text-4xl text-pink-300 text-center mb-10">12 MOTIVOS PRA GENTE VOLTAR CLARINHO QUE SIM</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="motivos"></div>
+    </div>
+
+    <!-- Frases Bonitas -->
+    <div class="window p-10 mb-10 rounded-3xl">
+      <h2 class="text-3xl text-pink-300 text-center mb-8">Frases que eu guardo pra você</h2>
+      <div class="space-y-6 text-center">
+        <p onclick="alert('Você é o motivo do meu sorriso todo dia ♡')" class="text-xl cursor-pointer hover:text-pink-200 transition">Você é o motivo do meu sorriso todo dia ♡</p>
+        <p onclick="alert('Mesmo longe, meu coração sempre te encontra')" class="text-xl cursor-pointer hover:text-pink-200 transition">Mesmo longe, meu coração sempre te encontra</p>
+        <p onclick="alert('Quero ser sua paz e sua bagunça ao mesmo tempo')" class="text-xl cursor-pointer hover:text-pink-200 transition">Quero ser sua paz e sua bagunça ao mesmo tempo</p>
+        <p onclick="alert('Com você, tudo fica mais doce')" class="text-xl cursor-pointer hover:text-pink-200 transition">Com você, tudo fica mais doce</p>
+      </div>
+    </div>
+
+    <!-- Carta -->
+    <div onclick="abrirCarta()" class="window p-12 cursor-pointer hover:scale-105 transition-all text-center rounded-3xl mb-10">
+      <i class="fa fa-envelope text-8xl text-pink-400 mb-6"></i>
+      <p class="text-3xl font-bold text-pink-200">LER A CARTA</p>
+    </div>
+
+    <!-- Botão Final -->
+    <div onclick="mensagemFinal()" class="window bg-gradient-to-r from-pink-600 to-rose-600 text-white py-20 text-center text-4xl font-bold cursor-pointer hover:brightness-110 rounded-3xl">
+      QUERO TU DE NOVO MO ♡
+    </div>
+
+  </div>
+
+  <canvas id="confetti" class="fixed inset-0 pointer-events-none z-50"></canvas>
+
+  <!-- Áudio -->
+  <audio id="bgMusic" loop>
+    <source src="musica.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- Modais -->
+  <div id="modalCarta" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4">
+    <div class="window max-w-lg w-full p-12 rounded-3xl">
+      <button onclick="fecharCarta()" class="float-right text-5xl text-pink-400">×</button>
+      <h2 class="text-pink-300 text-4xl mb-8">Bom, Mo...</h2>
+      <p class="leading-relaxed text-xl">
+        Eu estive pensando muito em quem seria a pessoa mais especial da minha vida, e decidi que seria você. 
+        Fiz esse site todo pra te mostrar o quanto eu te amo e o quanto quero tentar de novo. Se quiser escrever uma história linda de novo, me liga.
+      </p>
+      <button onclick="fecharCarta()" class="mt-10 w-full py-6 border-2 border-pink-400 text-pink-200 hover:bg-pink-500 hover:text-white text-xl rounded-2xl">Fechar Cartinha</button>
+    </div>
+  </div>
+
+  <div id="modalFinal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-50">
+    <div class="text-center">
+      <div class="text-8xl animate-bounce mb-8">❤️</div>
+      <p class="text-6xl text-pink-300 font-bold">EU TAMBÉM QUERO</p>
+      <button onclick="fecharFinal()" class="mt-12 bg-white text-pink-700 px-20 py-8 text-3xl font-bold rounded-3xl hover:bg-pink-100">SIM, VAMOS VOLTAR ♡</button>
+    </div>
+  </div>
+
+  <script>
+    // Confetti contínuo
+    const canvas = document.getElementById('confetti');
+    const ctx = canvas.getContext('2d');
+    let confettiParticles = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function createConfettiParticle() {
+      return {
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height - canvas.height,
+        size: Math.random() * 11 + 7,
+        speed: Math.random() * 6 + 4,
+        color: ['#ff69b4', '#ff1493', '#ffb3d1', '#ffffff', '#ff69b4'][Math.floor(Math.random()*5)],
+        angle: Math.random() * 360,
+        rotationSpeed: Math.random() * 0.12 + 0.05,
+        sway: Math.random() * 2 + 0.5
+      };
+    }
+
+    function drawConfetti() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let i = confettiParticles.length - 1; i >= 0; i--) {
+        const p = confettiParticles[i];
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.angle);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size);
+        ctx.restore();
+
+        p.y += p.speed;
+        p.x += Math.sin(p.angle) * p.sway;
+        p.angle += p.rotationSpeed;
+
+        if (p.y > canvas.height + 50) confettiParticles.splice(i, 1);
+      }
+      while (confettiParticles.length < 80) confettiParticles.push(createConfettiParticle());
+      requestAnimationFrame(drawConfetti);
+    }
+    drawConfetti();
+
+    // Música automática
+    const audio = document.getElementById('bgMusic');
+    function startMusic() {
+      audio.play().catch(() => {});
+    }
+    document.addEventListener('click', startMusic, { once: true });
+    document.addEventListener('touchstart', startMusic, { once: true });
+
+    // Game
+    let score = 0;
+    let timeLeft = 60;
+    let timerRunning = false;
+    const gameArea = document.getElementById('game-area');
+    const scoreElement = document.getElementById('score');
+    const timerElement = document.getElementById('timer');
+
+    function startTimer() {
+      if (timerRunning) return;
+      timerRunning = true;
+      const interval = setInterval(() => {
+        timeLeft--;
+        timerElement.textContent = timeLeft + "s";
+        if (timeLeft <= 15) timerElement.classList.add('text-red-500');
+        if (timeLeft <= 0) clearInterval(interval);
+      }, 1000);
+    }
+
+    function spawnHeart() {
+      const heart = document.createElement('div');
+      heart.className = 'heart';
+      heart.innerHTML = Math.random() > 0.5 ? '❤️' : '💗';
+      heart.style.left = Math.random() * 85 + '%';
+      heart.style.top = Math.random() * 75 + '%';
+      
+      heart.onclick = heart.ontouchstart = () => {
+        score += 1;
+        scoreElement.innerHTML = `❤️ ${score}`;
+        heart.remove();
+        if (!timerRunning) startTimer();
+
+        if (score === 67) {
+          const special = document.createElement('div');
+          special.style.cssText = `position:fixed;top:40%;left:50%;transform:translate(-50%,-50%);font-size:46px;color:#ff1493;text-align:center;z-index:99999;text-shadow:0 0 30px #ff69b4;`;
+          special.innerHTML = `SIX SEVEEEEEEN 💪<br>TE AMO CELINHAAAAAAAAAAA`;
+          document.body.appendChild(special);
+          setTimeout(() => special.remove(), 5500);
+        }
+      };
+      gameArea.appendChild(heart);
+      setTimeout(() => heart.remove(), 3800);
+    }
+    setInterval(spawnHeart, 520);
+
+    // Motivos
+    const motivos = ["Nois é cuscuzeiro","Ninguém me faz rir como você","Eu sinto a sua falta todos os dias","Nossas conversas são as melhores","Você ainda é minha pessoa favorita","A gente tem uma conexão especial","Quero construir um futuro com você","Ninguém me entende como você","Lembro de todos nossos momentos bons","Você merece o melhor de mim","Eu te amo de verdade","Junto nois é mais feliz"];
+
+    function criarMotivos() {
+      const container = document.getElementById('motivos');
+      motivos.forEach((motivo, index) => {
+        const div = document.createElement('div');
+        div.className = "window p-6 hover:scale-105 cursor-pointer transition-all border-pink-400";
+        div.innerHTML = `<span class="text-pink-400 text-3xl">${index + 1}.</span><p class="mt-4 text-lg">${motivo}</p>`;
+        div.onclick = () => { alert(`❤️ ${motivo}`); };
+        container.appendChild(div);
+      });
+    }
+    criarMotivos();
+
+    // Modais
+    function abrirCarta() { document.getElementById('modalCarta').classList.remove('hidden'); }
+    function fecharCarta() { document.getElementById('modalCarta').classList.add('hidden'); }
+    function mensagemFinal() { document.getElementById('modalFinal').classList.remove('hidden'); }
+    function fecharFinal() { document.getElementById('modalFinal').classList.add('hidden'); }
+  </script>
+</body>
+</html>
